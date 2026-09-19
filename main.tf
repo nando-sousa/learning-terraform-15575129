@@ -17,7 +17,6 @@ data "aws_ami" "app_ami" {
 module "blog_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "6.5.0"
-
   name = "dev"
   cidr = "10.0.0.0/16"
 
@@ -33,22 +32,9 @@ module "blog_vpc" {
   }
 }
 
-resource "aws_instance" "blog" {
-  ami                    = data.aws_ami.app_ami.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [module.blog_sg.security_group_id]
-
-  subnet_id = module.blog_vpc.public_subnets[0]
-
-  tags = {
-    Name = "Learning Terraform"
-  }
-}
-
 module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.13.0"
-
   vpc_id   = module.blog_vpc.vpc_id
   name     = "blog"
   ingress_rules = ["https-443-tcp", "http-80-tcp"]
@@ -93,4 +79,27 @@ resource "aws_lb_target_group_attachment" "blog" {
   target_group_arn = aws_lb_target_group.blog.arn
   target_id        = aws_instance.blog.id
   port             = 80
+}
+
+module "blog_autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "9.0.2"
+
+  name = "blog"
+
+  min_size = 1
+  max_size = 2
+
+  vpc_zone_identifier = module.blog_vpc.subnets
+  launch_template_name = "blog"
+  security_groups = [module.blog_sg.security_group_id]
+  instance_type   = var.instance_type
+
+  image_id        = data.aws_ami.app_ami.id
+
+  traffic_souce_attachments = {
+    blog-alb = {
+      traffic_source_identifier = aws_lb_target_group.blog.arn
+    }
+  }
 }
