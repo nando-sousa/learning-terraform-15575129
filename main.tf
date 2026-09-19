@@ -3,7 +3,7 @@ data "aws_ami" "app_ami" {
 
   filter {
     name   = "name"
-    values = ["tomcat-*-prod-eua7ofzpq4eok"]
+    values = ["turnkey-tomcat-*-amd64-marketplace-*-prod-ftp3auyrbkyyq"]
   }
 
   filter {
