@@ -58,6 +58,7 @@ module "blog_sg" {
 
 module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
+  version = "10.2.0"
 
   name    = "mblogy-alb"
   vpc_id  = module.blog_vpc.vpc_id
