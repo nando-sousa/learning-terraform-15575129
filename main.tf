@@ -61,7 +61,7 @@ module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
   version = "10.2.0"
 
-  name    = "mblogy-alb"
+  name    = "blog-alb"
   vpc_id  = module.blog_vpc.vpc_id
   subnets = module.blog_vpc.public_subnets
 
